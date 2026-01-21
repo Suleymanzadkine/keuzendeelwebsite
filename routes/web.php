@@ -1,35 +1,20 @@
 <?php
 
+use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\KeuzedeelController;
-use App\Http\Controllers\UserController;
-use App\Models\Keuzedeel;
 
 Route::get('/', function () {
-    $keuzedelen = Keuzedeel::all();
-    return view('index', compact('keuzedelen'));
+    return view('welcome');
 });
-Route::get('/about', function () {
-    return view('about');
+
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
-Route::get('/contact', function () {
-    return view('contact');
-});
-//Check2keer!!!
-Route::middleware(['auth'])->group(function () {
 
-    // Overzicht alle keuzedelen
-    Route::get('/keuzedelen', [KeuzedeelController::class, 'index'])->name('keuzedelen.index');
-
-    // Details van een keuzedeel
-    Route::get('/keuzedelen/{keuzedeel}', [KeuzedeelController::class, 'show'])->name('keuzedelen.show');
-
-    // Inschrijven
-    Route::post('/keuzedelen/{keuzedeel}/inschrijven', [KeuzedeelController::class, 'inschrijven'])->name('keuzedelen.inschrijven');
-
-    // Uitschrijven
-    Route::post('/keuzedelen/{keuzedeel}/uitschrijven', [KeuzedeelController::class, 'uitschrijven'])->name('keuzedelen.uitschrijven');
-
-    // Mijn inschrijvingen
-    Route::get('/mijn-inschrijvingen', [KeuzedeelController::class, 'mijnInschrijvingen'])->name('keuzedelen.mijn-inschrijvingen');
-});
+require __DIR__.'/auth.php';
