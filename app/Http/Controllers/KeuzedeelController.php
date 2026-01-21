@@ -48,7 +48,7 @@ class KeuzedeelController extends Controller
             return back()->with('error', 'You have already chosen a keuzedeel for this period.');
         }
 
-        // Validation 4: Already registered?
+        // Validation 4: Already registered????
         $bestaandeInschrijving = Inschrijving::where('user_id', $user->id)
             ->where('keuzedeel_id', $keuzedeel->id)
             ->where('status', 'ingeschreven')
