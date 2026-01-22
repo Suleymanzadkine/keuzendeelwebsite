@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\LogController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -15,6 +16,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+// Admin Routes
+Route::middleware(['auth', 'verified', 'is_admin'])->group(function () {
+    Route::get('/logs', [LogController::class, 'index'])->name('logs.index');
+    Route::post('/logs/clear', [LogController::class, 'clear'])->name('logs.clear');
+    Route::get('/logs/download', [LogController::class, 'download'])->name('logs.download');
 });
 
 require __DIR__.'/auth.php';
