@@ -20,12 +20,7 @@
             </div>
             @endif
 
-            <!-- Link to my registrations -->
-            <div class="mb-6">
-                <a href="{{ route('mijn-inschrijvingen') }}" class="inline-flex items-center px-4 py-2 bg-gray-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 transition">
-                    Mijn Inschrijvingen
-                </a>
-            </div>
+            
 
             <!-- Keuzedelen Grid -->
             <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
