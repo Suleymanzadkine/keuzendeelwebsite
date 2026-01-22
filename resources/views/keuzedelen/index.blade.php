@@ -33,7 +33,7 @@
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6 text-gray-900">
                         <h3 class="text-lg font-semibold mb-2">{{ $keuzedeel->naam }}</h3>
-                        
+
                         <p class="text-gray-600 text-sm mb-4">{{ Str::limit($keuzedeel->beschrijving, 100) }}</p>
 
                         <div class="space-y-2 text-sm mb-4">
@@ -44,8 +44,8 @@
 
                         @php
                         $isIngeschreven = auth()->user()->actieveInschrijvingen()
-                            ->where('keuzedeel_id', $keuzedeel->id)
-                            ->exists() ?? false;
+                        ->where('keuzedeel_id', $keuzedeel->id)
+                        ->exists() ?? false;
                         $isAfgerond = auth()->user()->heeftKeuzedeelAfgerond($keuzedeel->id) ?? false;
                         $heeftPeriode = auth()->user()->heeftInschrijvingVoorPeriode($keuzedeel->periode) ?? false;
                         @endphp
