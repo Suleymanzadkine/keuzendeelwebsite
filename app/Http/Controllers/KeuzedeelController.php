@@ -98,6 +98,28 @@ class KeuzedeelController extends Controller
         return view('keuzedelen.mijn-inschrijvingen', compact('inschrijvingen'));
     }
 
+    // Create a new keuzedeel (admin only)
+    public function create()
+    {
+        return view('keuzedelen.create');
+    }
+
+    // Store a new keuzedeel (admin only)
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'naam' => 'required|string|max:255',
+            'beschrijving' => 'required|string',
+            'min_deelnemers' => 'required|integer|min:1',
+            'max_deelnemers' => 'required|integer|gte:min_deelnemers',
+            'periode' => 'required|string|max:50',
+        ]);
+
+        Keuzedeel::create($validated);
+
+        return redirect()->route('keuzedelen.index')->with('success', 'Keuzedeel succesvol toegevoegd!');
+    }
+
     private function getAuthenticatedUser(): User
     {
         $user = Auth::user();

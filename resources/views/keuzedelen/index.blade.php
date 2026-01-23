@@ -20,7 +20,14 @@
             </div>
             @endif
 
-            
+            <!-- Add Keuzedeel Button (Admin Only) -->
+            @if(auth()->user() && auth()->user()->is_admin)
+            <div class="mb-6">
+                <a href="{{ route('keuzedelen.create') }}" class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-sm text-white uppercase tracking-widest hover:bg-green-700 transition">
+                    + Keuzedeel Toevoegen
+                </a>
+            </div>
+            @endif
 
             <!-- Keuzedelen Grid -->
             <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">

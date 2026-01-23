@@ -80,8 +80,7 @@
 
                     <!-- Action Buttons -->
                     @php
-                    use Illuminate\Support\Facades\Auth;
-                    $user = Auth::user();
+                    $user = auth()->user();
                     $isIngeschreven = $user->actieveInschrijvingen()
                         ->where('keuzedeel_id', $keuzedeel->id)
                         ->exists();
