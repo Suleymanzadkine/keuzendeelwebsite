@@ -34,7 +34,14 @@
                 @foreach($keuzedelen as $keuzedeel)
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6 text-gray-900">
-                        <h3 class="text-lg font-semibold mb-2">{{ $keuzedeel->naam }}</h3>
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="text-lg font-semibold">{{ $keuzedeel->naam }}</h3>
+                            @if(auth()->user() && auth()->user()->is_admin)
+                            <span class="px-2 py-1 text-xs font-semibold rounded-full {{ $keuzedeel->is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                {{ $keuzedeel->is_active ? 'Actief' : 'Inactief' }}
+                            </span>
+                            @endif
+                        </div>
 
                         <p class="text-gray-600 text-sm mb-4">{{ Str::limit($keuzedeel->beschrijving, 100) }}</p>
 

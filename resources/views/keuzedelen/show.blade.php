@@ -74,6 +74,16 @@
                                         @endif
                                     </dd>
                                 </div>
+                                @if(auth()->user() && auth()->user()->is_admin)
+                                <div>
+                                    <dt class="font-semibold text-gray-700">Activering:</dt>
+                                    <dd class="text-gray-600">
+                                        <span class="px-2 py-1 text-xs font-semibold rounded-full {{ $keuzedeel->is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                            {{ $keuzedeel->is_active ? 'Actief' : 'Inactief' }}
+                                        </span>
+                                    </dd>
+                                </div>
+                                @endif
                             </dl>
                         </div>
                     </div>
@@ -128,6 +138,9 @@
                                 <tr>
                                     <th class="px-4 py-2 text-left text-sm font-semibold">Naam</th>
                                     <th class="px-4 py-2 text-left text-sm font-semibold">Email</th>
+                                    @if(auth()->user()->is_admin)
+                                    <th class="px-4 py-2 text-left text-sm font-semibold">Acties</th>
+                                    @endif
                                 </tr>
                             </thead>
                             <tbody class="divide-y">
@@ -135,6 +148,17 @@
                                 <tr class="hover:bg-gray-50">
                                     <td class="px-4 py-2 text-sm">{{ $inschrijving->user->name }}</td>
                                     <td class="px-4 py-2 text-sm">{{ $inschrijving->user->email }}</td>
+                                    @if(auth()->user()->is_admin)
+                                    <td class="px-4 py-2 text-sm">
+                                        <form method="POST" action="{{ route('inschrijvingen.verwijderen', $inschrijving) }}" style="display: inline;">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="text-red-600 hover:text-red-800 font-semibold" onclick="return confirm('Zeker weten dat je deze leerling wilt verwijderen?')">
+                                                Verwijderen
+                                            </button>
+                                        </form>
+                                    </td>
+                                    @endif
                                 </tr>
                                 @endforeach
                             </tbody>
@@ -145,6 +169,28 @@
                     @endif
                 </div>
             </div>
+
+            <!-- Admin Actions -->
+            @if(auth()->user()->is_admin)
+            <div class="mt-8 flex gap-4 flex-wrap">
+                <a href="{{ route('keuzedelen.edit', $keuzedeel) }}" class="px-6 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-white hover:bg-blue-700 transition">
+                    Bewerken
+                </a>
+                <form method="POST" action="{{ route('keuzedelen.toggle-active', $keuzedeel) }}" style="display: inline;">
+                    @csrf
+                    <button type="submit" class="px-6 py-2 {{ $keuzedeel->is_active ? 'bg-yellow-600 hover:bg-yellow-700' : 'bg-green-600 hover:bg-green-700' }} border border-transparent rounded-md font-semibold text-white transition">
+                        {{ $keuzedeel->is_active ? '⊘ Deactiveren' : '✓ Activeren' }}
+                    </button>
+                </form>
+                <form method="POST" action="{{ route('keuzedelen.destroy', $keuzedeel) }}" style="display: inline;">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="px-6 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-white hover:bg-red-700 transition" onclick="return confirm('Zeker weten dat je dit keuzedeel wilt verwijderen?')">
+                        Verwijderen
+                    </button>
+                </form>
+            </div>
+            @endif
         </div>
     </div>
 </x-app-layout>

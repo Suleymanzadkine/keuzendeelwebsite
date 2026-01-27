@@ -16,7 +16,8 @@ class Keuzedeel extends Model
         'beschrijving',
         'min_deelnemers',
         'max_deelnemers',
-        'periode'
+        'periode',
+        'is_active',
     ];
 
     public function inschrijvingen()

@@ -120,6 +120,51 @@ class KeuzedeelController extends Controller
         return redirect()->route('keuzedelen.index')->with('success', 'Keuzedeel succesvol toegevoegd!');
     }
 
+    // Edit a keuzedeel (admin only)
+    public function edit(Keuzedeel $keuzedeel)
+    {
+        return view('keuzedelen.edit', compact('keuzedeel'));
+    }
+
+    // Update a keuzedeel (admin only)
+    public function update(Request $request, Keuzedeel $keuzedeel)
+    {
+        $validated = $request->validate([
+            'naam' => 'required|string|max:255',
+            'beschrijving' => 'required|string',
+            'min_deelnemers' => 'required|integer|min:1',
+            'max_deelnemers' => 'required|integer|gte:min_deelnemers',
+            'periode' => 'required|string|max:50',
+        ]);
+
+        $keuzedeel->update($validated);
+
+        return redirect()->route('keuzedelen.show', $keuzedeel)->with('success', 'Keuzedeel succesvol bijgewerkt!');
+    }
+
+    // Delete a keuzedeel (admin only)
+    public function destroy(Keuzedeel $keuzedeel)
+    {
+        $keuzedeel->delete();
+        return redirect()->route('keuzedelen.index')->with('success', 'Keuzedeel succesvol verwijderd!');
+    }
+
+    // Remove student from keuzedeel (admin only)
+    public function verwijderLeerling(Inschrijving $inschrijving)
+    {
+        $keuzedeel = $inschrijving->keuzedeel;
+        $inschrijving->delete();
+        return back()->with('success', 'Leerling succesvol verwijderd!');
+    }
+
+    // Toggle active status of keuzedeel (admin only)
+    public function toggleActive(Keuzedeel $keuzedeel)
+    {
+        $keuzedeel->update(['is_active' => !$keuzedeel->is_active]);
+        $status = $keuzedeel->is_active ? 'geactiveerd' : 'gedeactiveerd';
+        return back()->with('success', "Keuzedeel succesvol $status!");
+    }
+
     private function getAuthenticatedUser(): User
     {
         $user = Auth::user();

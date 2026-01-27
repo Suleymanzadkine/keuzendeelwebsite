@@ -20,10 +20,15 @@ Route::middleware('auth')->group(function () {
     Route::get('/keuzedelen', [KeuzedeelController::class, 'index'])->name('keuzedelen.index');
     Route::get('/keuzedelen/create', [KeuzedeelController::class, 'create'])->name('keuzedelen.create');
     Route::get('/keuzedelen/{keuzedeel}', [KeuzedeelController::class, 'show'])->name('keuzedelen.show');
+    Route::get('/keuzedelen/{keuzedeel}/edit', [KeuzedeelController::class, 'edit'])->name('keuzedelen.edit');
+    Route::patch('/keuzedelen/{keuzedeel}', [KeuzedeelController::class, 'update'])->name('keuzedelen.update');
+    Route::delete('/keuzedelen/{keuzedeel}', [KeuzedeelController::class, 'destroy'])->name('keuzedelen.destroy');
+    Route::post('/keuzedelen/{keuzedeel}/toggle-active', [KeuzedeelController::class, 'toggleActive'])->name('keuzedelen.toggle-active');
     Route::get('/mijn-inschrijvingen', [KeuzedeelController::class, 'mijnInschrijvingen'])->name('mijn-inschrijvingen');
     Route::post('/keuzedelen/{keuzedeel}/inschrijven', [KeuzedeelController::class, 'inschrijven'])->name('keuzedelen.inschrijven');
     Route::delete('/keuzedelen/{keuzedeel}/uitschrijven', [KeuzedeelController::class, 'uitschrijven'])->name('keuzedelen.uitschrijven');
     Route::post('/keuzedelen', [KeuzedeelController::class, 'store'])->name('keuzedelen.store');
+    Route::delete('/inschrijvingen/{inschrijving}/verwijderen', [KeuzedeelController::class, 'verwijderLeerling'])->name('inschrijvingen.verwijderen');
 });
 
 // Admin Routes
