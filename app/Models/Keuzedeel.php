@@ -19,11 +19,21 @@ class Keuzedeel extends Model
         'periode',
         'is_active',
         'allow_multiple',
+        'low_notified_at',
+    ];
+
+    protected $casts = [
+        'low_notified_at' => 'datetime',
     ];
 
     public function inschrijvingen()
     {
         return $this->hasMany(Inschrijving::class);
+    }
+
+    public function isBelowMinimum()
+    {
+        return $this->aantalIngeschreven() < $this->min_deelnemers;
     }
 
     public function actieveInschrijvingen()

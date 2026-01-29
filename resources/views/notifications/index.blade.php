@@ -5,6 +5,9 @@
             <div class="mb-4">
                 <form method="POST" action="{{ route('notifications.mark-all-read') }}">@csrf<button class="px-3 py-1 bg-gray-200">Markeer alle als gelezen</button></form>
             </div>
+            @if(session('success'))
+            <div class="mb-4 text-green-600">{{ session('success') }}</div>
+            @endif
             <ul>
                 @foreach($notifications as $notification)
                 <li class="border-t py-3">

@@ -16,6 +16,10 @@
                         {{ __('Dashboard') }}
                     </x-nav-link>
                     @auth
+                        <x-nav-link :href="route('mijn-inschrijvingen')" :active="request()->routeIs('mijn-inschrijvingen')">
+                            {{ __('Mijn inschrijvingen') }}
+                        </x-nav-link>
+
                         @if(auth()->user()->isAdmin())
                             <x-dropdown align="left" width="48">
                                 <x-slot name="trigger">
@@ -55,7 +59,7 @@
                         <div id="notif-dropdown" class="hidden absolute right-0 mt-2 w-80 bg-white border rounded shadow-lg z-50">
                             <div class="p-3">
                                 <div class="font-semibold mb-2">Meldingen</div>
-                                @foreach(auth()->user()->notifications()->orderBy('created_at','desc')->limit(5)->get() as $notification)
+                                @foreach(auth()->user()->unreadNotifications()->orderBy('created_at','desc')->limit(5)->get() as $notification)
                                 <div class="border-t pt-2 pb-2">
                                     <div class="text-sm font-semibold">{{ $notification->data['title'] ?? 'Melding' }}</div>
                                     <div class="text-sm text-gray-700">{{ $notification->data['message'] ?? '' }}</div>

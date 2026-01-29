@@ -16,12 +16,12 @@ class NotificationController extends Controller
     {
         $notification = auth()->user()->notifications()->where('id', $id)->firstOrFail();
         $notification->markAsRead();
-        return back();
+        return back()->with('success', 'Melding gemarkeerd als gelezen.');
     }
 
     public function markAllRead()
     {
         auth()->user()->unreadNotifications->markAsRead();
-        return back();
+        return back()->with('success', 'Alle meldingen gemarkeerd als gelezen.');
     }
 }

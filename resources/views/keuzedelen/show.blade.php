@@ -83,6 +83,14 @@
                                         </span>
                                     </dd>
                                 </div>
+                                @if($keuzedeel->isBelowMinimum())
+                                <div>
+                                    <dt class="font-semibold text-gray-700">Let op:</dt>
+                                    <dd class="text-gray-600">
+                                        <span class="px-2 py-1 text-xs font-semibold rounded-full bg-rose-100 text-rose-800">Te weinig inschrijvingen ({{ $keuzedeel->aantalIngeschreven() }} / {{ $keuzedeel->min_deelnemers }})</span>
+                                    </dd>
+                                </div>
+                                @endif
                                 @endif
                             </dl>
                         </div>
@@ -117,7 +125,7 @@
                         @else
                         <form method="POST" action="{{ route('keuzedelen.inschrijven', $keuzedeel) }}">
                             @csrf
-                            <button type="submit" class="px-6 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-white hover:bg-green-700 transition">
+                            <button type="submit" class="px-6 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-white hover:bg-green-700 transition shadow focus:outline-none" style="background-color:#16a34a;color:#ffffff">
                                 Inschrijven
                             </button>
                         </form>

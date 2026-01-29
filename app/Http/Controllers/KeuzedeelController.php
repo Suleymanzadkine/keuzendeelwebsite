@@ -7,6 +7,7 @@ use App\Models\Inschrijving;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Notification;
 
 class KeuzedeelController extends Controller
 {
@@ -227,6 +228,9 @@ class KeuzedeelController extends Controller
 
         // Notify the user about removal
         $user->notify(new \App\Notifications\StudentRemovedNotification($keuzedeel->naam, $count ?: 0, $keuzedeel->id));
+
+        // Check low enrollment for admins
+        $this->checkLowEnrollment($keuzedeel);
 
         return back()->with('success', 'Alle inschrijvingen van leerling verwijderd!');
     }

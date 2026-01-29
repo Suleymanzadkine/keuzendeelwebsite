@@ -37,9 +37,14 @@
                         <div class="flex justify-between items-start mb-2">
                             <h3 class="text-lg font-semibold">{{ $keuzedeel->naam }}</h3>
                             @if(auth()->user() && auth()->user()->is_admin)
-                            <span class="px-2 py-1 text-xs font-semibold rounded-full {{ $keuzedeel->is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
-                                {{ $keuzedeel->is_active ? 'Actief' : 'Inactief' }}
-                            </span>
+                            <div class="flex gap-2">
+                                <span class="px-2 py-1 text-xs font-semibold rounded-full {{ $keuzedeel->is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                    {{ $keuzedeel->is_active ? 'Actief' : 'Inactief' }}
+                                </span>
+                                @if($keuzedeel->isBelowMinimum())
+                                <span class="px-2 py-1 text-xs font-semibold rounded-full bg-rose-100 text-rose-800">Te weinig inschrijvingen</span>
+                                @endif
+                            </div>
                             @endif
                         </div>
 
@@ -87,7 +92,7 @@
                             @else
                             <form method="POST" action="{{ route('keuzedelen.inschrijven', $keuzedeel) }}" class="flex-1">
                                 @csrf
-                                <button type="submit" class="w-full px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-700 transition">
+                                <button type="submit" class="w-full px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-700 transition shadow focus:outline-none" style="background-color:#16a34a;color:#ffffff">
                                     Inschrijven
                                 </button>
                             </form>

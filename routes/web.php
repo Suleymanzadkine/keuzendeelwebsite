@@ -31,6 +31,11 @@ Route::middleware('auth')->group(function () {
     Route::delete('/keuzedelen/{keuzedeel}/uitschrijven', [KeuzedeelController::class, 'uitschrijven'])->name('keuzedelen.uitschrijven');
     Route::post('/keuzedelen', [KeuzedeelController::class, 'store'])->name('keuzedelen.store');
     Route::delete('/inschrijvingen/{inschrijving}/verwijderen', [KeuzedeelController::class, 'verwijderLeerling'])->name('inschrijvingen.verwijderen');
+
+    // Notifications (for all authenticated users)
+    Route::get('/notifications', [\App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/{id}/read', [\App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::post('/notifications/mark-all-read', [\App\Http\Controllers\NotificationController::class, 'markAllRead'])->name('notifications.mark-all-read');
 });
 
 // Admin Routes
@@ -42,10 +47,7 @@ Route::middleware(['auth', 'verified', 'is_admin'])->group(function () {
     // Admin action: remove all enrollments of a user for a keuzedeel
     Route::delete('/inschrijvingen/{keuzedeel}/user/{user}/verwijderen', [KeuzedeelController::class, 'verwijderLeerlingVoorGebruiker'])->name('inschrijvingen.verwijderen.user');
 
-    // Notifications
-    Route::get('/notifications', [\App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
-    Route::post('/notifications/{id}/read', [\App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('notifications.read');
-    Route::post('/notifications/mark-all-read', [\App\Http\Controllers\NotificationController::class, 'markAllRead'])->name('notifications.mark-all-read');
+
 
     // Role management
     Route::prefix('admin')->name('admin.')->group(function () {
