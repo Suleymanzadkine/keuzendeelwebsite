@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use App\Models\Inschrijving;
+use App\Models\Role;
 
 class User extends Authenticatable
 {
@@ -17,6 +18,49 @@ class User extends Authenticatable
         'password',
         'is_admin',
     ];
+
+    // Roles relationship and helpers
+    public function roles()
+    {
+        return $this->belongsToMany(Role::class);
+    }
+
+    public function hasRole($role)
+    {
+        if (is_array($role)) {
+            return $this->roles()->whereIn('name', $role)->exists();
+        }
+        return $this->roles()->where('name', $role)->exists();
+    }
+
+    public function assignRole($role)
+    {
+        if ($role instanceof Role) {
+            $this->roles()->syncWithoutDetaching($role);
+        } else {
+            $roleModel = Role::where('name', $role)->first();
+            if ($roleModel) {
+                $this->roles()->syncWithoutDetaching($roleModel);
+            }
+        }
+    }
+
+    public function removeRole($role)
+    {
+        if ($role instanceof Role) {
+            $this->roles()->detach($role);
+        } else {
+            $roleModel = Role::where('name', $role)->first();
+            if ($roleModel) {
+                $this->roles()->detach($roleModel);
+            }
+        }
+    }
+
+    public function isAdmin()
+    {
+        return $this->is_admin || $this->hasRole('admin');
+    }
 
     protected $hidden = [
         'password',

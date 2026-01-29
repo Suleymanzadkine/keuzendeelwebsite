@@ -48,22 +48,42 @@ class KeuzedeelController extends Controller
             return back()->with('error', 'You have already chosen a keuzedeel for this period.');
         }
 
-        // Validation 4: Already registered????
+        // Validation 4: Check for any existing registration (regardless of status)
         $bestaandeInschrijving = Inschrijving::where('user_id', $user->id)
             ->where('keuzedeel_id', $keuzedeel->id)
-            ->where('status', 'ingeschreven')
             ->first();
 
         if ($bestaandeInschrijving) {
-            return back()->with('error', 'You are already registered for this keuzedeel.');
+            if ($bestaandeInschrijving->status === 'ingeschreven') {
+                return back()->with('error', 'You are already registered for this keuzedeel.');
+            }
+
+            // Re-activate previous registration
+            $bestaandeInschrijving->update(['status' => 'ingeschreven']);
+
+            return back()->with('success', 'You have been successfully registered!');
         }
 
-        // Create registration
-        Inschrijving::create([
-            'user_id' => $user->id,
-            'keuzedeel_id' => $keuzedeel->id,
-            'status' => 'ingeschreven'
-        ]);
+        // Try to create a new registration, handle race-condition unique constraint
+        try {
+            Inschrijving::create([
+                'user_id' => $user->id,
+                'keuzedeel_id' => $keuzedeel->id,
+                'status' => 'ingeschreven'
+            ]);
+        } catch (\Illuminate\Database\QueryException $e) {
+            // If unique constraint violation occurred, attempt to update existing record
+            if (str_contains($e->getMessage(), 'UNIQUE') || $e->getCode() === '23000') {
+                $ins = Inschrijving::where('user_id', $user->id)->where('keuzedeel_id', $keuzedeel->id)->first();
+                if ($ins && $ins->status !== 'ingeschreven') {
+                    $ins->update(['status' => 'ingeschreven']);
+                    return back()->with('success', 'You have been successfully registered!');
+                }
+                return back()->with('error', 'You are already registered for this keuzedeel.');
+            }
+
+            throw $e;
+        }
 
         return back()->with('success', 'You have been successfully registered!');
     }
@@ -80,6 +100,11 @@ class KeuzedeelController extends Controller
 
         if ($inschrijving) {
             $inschrijving->update(['status' => 'geannuleerd']);
+
+            // Notify the user they've been removed
+            $user = $inschrijving->user;
+            $user->notify(new \App\Notifications\StudentRemovedNotification($keuzedeel->naam, 1, $keuzedeel->id));
+
             return back()->with('success', 'You have been unregistered.');
         }
 
@@ -113,7 +138,11 @@ class KeuzedeelController extends Controller
             'min_deelnemers' => 'required|integer|min:1',
             'max_deelnemers' => 'required|integer|gte:min_deelnemers',
             'periode' => 'required|string|max:50',
+            'allow_multiple' => 'sometimes|boolean',
         ]);
+
+        // Ensure boolean value is set when checkbox is absent
+        $validated['allow_multiple'] = $request->has('allow_multiple') ? (bool) $request->input('allow_multiple') : false;
 
         Keuzedeel::create($validated);
 
@@ -135,9 +164,24 @@ class KeuzedeelController extends Controller
             'min_deelnemers' => 'required|integer|min:1',
             'max_deelnemers' => 'required|integer|gte:min_deelnemers',
             'periode' => 'required|string|max:50',
+            'allow_multiple' => 'sometimes|boolean',
         ]);
 
+        // Normalize checkbox boolean
+        $validated['allow_multiple'] = $request->has('allow_multiple') ? (bool) $request->input('allow_multiple') : false;
+
+        $original = $keuzedeel->getOriginal();
         $keuzedeel->update($validated);
+
+        // Determine simple changes for notification
+        $changes = array_diff_assoc($keuzedeel->getAttributes(), $original);
+        $users = \App\Models\User::whereHas('inschrijvingen', function ($q) use ($keuzedeel) {
+            $q->where('keuzedeel_id', $keuzedeel->id)->where('status', 'ingeschreven');
+        })->get();
+
+        if ($users->isNotEmpty()) {
+            \Illuminate\Support\Facades\Notification::send($users, new \App\Notifications\KeuzedeelUpdatedNotification($keuzedeel, $changes));
+        }
 
         return redirect()->route('keuzedelen.show', $keuzedeel)->with('success', 'Keuzedeel succesvol bijgewerkt!');
     }
@@ -150,11 +194,41 @@ class KeuzedeelController extends Controller
     }
 
     // Remove student from keuzedeel (admin only)
-    public function verwijderLeerling(Inschrijving $inschrijving)
+    public function verwijderLeerling($inschrijvingId)
     {
+        $inschrijving = Inschrijving::find($inschrijvingId);
+
+        if (! $inschrijving) {
+            return back()->with('error', 'Inschrijving niet gevonden.');
+        }
+
         $keuzedeel = $inschrijving->keuzedeel;
+        $user = $inschrijving->user;
         $inschrijving->delete();
+
+        // Notify the user
+        $user->notify(new \App\Notifications\StudentRemovedNotification($keuzedeel->naam, 1, $keuzedeel->id));
+
         return back()->with('success', 'Leerling succesvol verwijderd!');
+    }
+
+    // Remove ALL inscriptions of a specific user for a keuzedeel (admin only)
+    public function verwijderLeerlingVoorGebruiker(Keuzedeel $keuzedeel, User $user)
+    {
+        $count = Inschrijving::where('keuzedeel_id', $keuzedeel->id)
+            ->where('user_id', $user->id)
+            ->where('status', 'ingeschreven')
+            ->count();
+
+        Inschrijving::where('keuzedeel_id', $keuzedeel->id)
+            ->where('user_id', $user->id)
+            ->where('status', 'ingeschreven')
+            ->delete();
+
+        // Notify the user about removal
+        $user->notify(new \App\Notifications\StudentRemovedNotification($keuzedeel->naam, $count ?: 0, $keuzedeel->id));
+
+        return back()->with('success', 'Alle inschrijvingen van leerling verwijderd!');
     }
 
     // Toggle active status of keuzedeel (admin only)
@@ -162,6 +236,15 @@ class KeuzedeelController extends Controller
     {
         $keuzedeel->update(['is_active' => !$keuzedeel->is_active]);
         $status = $keuzedeel->is_active ? 'geactiveerd' : 'gedeactiveerd';
+
+        $users = \App\Models\User::whereHas('inschrijvingen', function ($q) use ($keuzedeel) {
+            $q->where('keuzedeel_id', $keuzedeel->id)->where('status', 'ingeschreven');
+        })->get();
+
+        if ($users->isNotEmpty()) {
+            \Illuminate\Support\Facades\Notification::send($users, new \App\Notifications\KeuzedeelStatusChangedNotification($keuzedeel));
+        }
+
         return back()->with('success', "Keuzedeel succesvol $status!");
     }
 

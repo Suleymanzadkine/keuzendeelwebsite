@@ -15,7 +15,7 @@ class IsAdmin
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!auth()->check() || !auth()->user()->is_admin) {
+        if (!auth()->check() || !(auth()->user()->is_admin || (method_exists(auth()->user(), 'hasRole') && auth()->user()->hasRole('admin')))) {
             return redirect()->route('dashboard')->with('error', 'Je hebt geen toegang tot deze pagina.');
         }
 

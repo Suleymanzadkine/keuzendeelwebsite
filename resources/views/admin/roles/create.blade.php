@@ -1,0 +1,22 @@
+<x-app-layout>
+    <x-slot name="header">
+        <h2 class="font-semibold text-xl">Nieuwe rol</h2>
+    </x-slot>
+
+    <div class="py-6">
+        <div class="max-w-2xl mx-auto sm:px-6 lg:px-8">
+            <form method="POST" action="{{ route('admin.roles.store') }}">
+                @csrf
+                <div class="mb-4">
+                    <label class="block">Naam</label>
+                    <input name="name" class="w-full border px-3 py-2" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block">Weergave</label>
+                    <input name="display_name" class="w-full border px-3 py-2">
+                </div>
+                <button class="px-4 py-2 bg-blue-600 text-white">Opslaan</button>
+            </form>
+        </div>
+    </div>
+</x-app-layout>

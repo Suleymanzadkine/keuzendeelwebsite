@@ -3,6 +3,8 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\LogController;
 use App\Http\Controllers\KeuzedeelController;
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -36,6 +38,22 @@ Route::middleware(['auth', 'verified', 'is_admin'])->group(function () {
     Route::get('/logs', [LogController::class, 'index'])->name('logs.index');
     Route::post('/logs/clear', [LogController::class, 'clear'])->name('logs.clear');
     Route::get('/logs/download', [LogController::class, 'download'])->name('logs.download');
+
+    // Admin action: remove all enrollments of a user for a keuzedeel
+    Route::delete('/inschrijvingen/{keuzedeel}/user/{user}/verwijderen', [KeuzedeelController::class, 'verwijderLeerlingVoorGebruiker'])->name('inschrijvingen.verwijderen.user');
+
+    // Notifications
+    Route::get('/notifications', [\App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/{id}/read', [\App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::post('/notifications/mark-all-read', [\App\Http\Controllers\NotificationController::class, 'markAllRead'])->name('notifications.mark-all-read');
+
+    // Role management
+    Route::prefix('admin')->name('admin.')->group(function () {
+        Route::resource('roles', RoleController::class)->except(['show']);
+        Route::get('users', [UserController::class, 'index'])->name('users.index');
+        Route::get('users/{user}/roles', [UserController::class, 'editRoles'])->name('users.edit-roles');
+        Route::post('users/{user}/roles', [UserController::class, 'updateRoles'])->name('users.update-roles');
+    });
 });
 
 require __DIR__.'/auth.php';

@@ -53,6 +53,14 @@
                             @enderror
                         </div>
 
+                        <!-- Allow multiple enrollments -->
+                        <div class="mb-6">
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" name="allow_multiple" value="1" class="mr-2" {{ old('allow_multiple', $keuzedeel->allow_multiple) ? 'checked' : '' }}>
+                                Meerdere keren volgen toegestaan
+                            </label>
+                        </div>
+
                         <!-- Minimaal Deelnemers -->
                         <div class="grid grid-cols-2 gap-4 mb-6">
                             <div>

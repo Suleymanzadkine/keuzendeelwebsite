@@ -144,23 +144,47 @@
                                 </tr>
                             </thead>
                             <tbody class="divide-y">
-                                @foreach($keuzedeel->actieveInschrijvingen as $inschrijving)
-                                <tr class="hover:bg-gray-50">
-                                    <td class="px-4 py-2 text-sm">{{ $inschrijving->user->name }}</td>
-                                    <td class="px-4 py-2 text-sm">{{ $inschrijving->user->email }}</td>
-                                    @if(auth()->user()->is_admin)
-                                    <td class="px-4 py-2 text-sm">
-                                        <form method="POST" action="{{ route('inschrijvingen.verwijderen', $inschrijving) }}" style="display: inline;">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="text-red-600 hover:text-red-800 font-semibold" onclick="return confirm('Zeker weten dat je deze leerling wilt verwijderen?')">
-                                                Verwijderen
-                                            </button>
-                                        </form>
-                                    </td>
-                                    @endif
-                                </tr>
-                                @endforeach
+                                @if($keuzedeel->allow_multiple)
+                                    @php
+                                        $grouped = $keuzedeel->actieveInschrijvingen->groupBy('user_id');
+                                    @endphp
+                                    @foreach($grouped as $userId => $inschrijvingen)
+                                    @php $user = $inschrijvingen->first()->user; @endphp
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-4 py-2 text-sm">{{ $user->name }}</td>
+                                        <td class="px-4 py-2 text-sm">{{ $user->email }} @if(count($inschrijvingen) > 1)<span class="text-xs text-gray-500"> ({{ count($inschrijvingen) }})</span>@endif</td>
+                                        @if(auth()->user()->is_admin)
+                                        <td class="px-4 py-2 text-sm">
+                                            <form method="POST" action="{{ route('inschrijvingen.verwijderen.user', [$keuzedeel, $user]) }}" style="display: inline;">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="text-red-600 hover:text-red-800 font-semibold" onclick="return confirm('Zeker weten dat je alle inschrijvingen van deze leerling wilt verwijderen?')">
+                                                    Verwijderen
+                                                </button>
+                                            </form>
+                                        </td>
+                                        @endif
+                                    </tr>
+                                    @endforeach
+                                @else
+                                    @foreach($keuzedeel->actieveInschrijvingen as $inschrijving)
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-4 py-2 text-sm">{{ $inschrijving->user->name }}</td>
+                                        <td class="px-4 py-2 text-sm">{{ $inschrijving->user->email }}</td>
+                                        @if(auth()->user()->is_admin)
+                                        <td class="px-4 py-2 text-sm">
+                                            <form method="POST" action="{{ route('inschrijvingen.verwijderen', $inschrijving) }}" style="display: inline;">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="text-red-600 hover:text-red-800 font-semibold" onclick="return confirm('Zeker weten dat je deze leerling wilt verwijderen?')">
+                                                    Verwijderen
+                                                </button>
+                                            </form>
+                                        </td>
+                                        @endif
+                                    </tr>
+                                    @endforeach
+                                @endif
                             </tbody>
                         </table>
                     </div>
