@@ -50,4 +50,25 @@ class Keuzedeel extends Model
     {
         return $this->actieveInschrijvingen()->count();
     }
+
+    public function isActief()
+    {
+        return $this->is_active === true;
+    }
+
+    public function isBeschikbaar()
+    {
+        return $this->isActief() && !$this->isVol();
+    }
+
+    public function scopeActief($query)
+    {
+        return $query->where('is_active', true);
+    }
+
+    public function scopeBeschikbaar($query)
+    {
+        return $query->where('is_active', true)
+            ->whereRaw('(SELECT COUNT(*) FROM inschrijvingen WHERE keuzedeel_id = keuzedelen.id AND status = "ingeschreven") < max_deelnemers');
+    }
 }

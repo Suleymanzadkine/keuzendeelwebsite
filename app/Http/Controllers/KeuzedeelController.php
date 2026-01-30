@@ -33,7 +33,9 @@ class KeuzedeelController extends Controller
     {
         $user = $this->getAuthenticatedUser();
 
-
+        if (!$keuzedeel->is_active) {
+            return back()->with('error', 'This keuzedeel is currently not available for registration.');
+        }
         // Validation 1: Is keuzedeel full?
         if ($keuzedeel->isVol()) {
             return back()->with('error', 'This keuzedeel is unfortunately full.');
