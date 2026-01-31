@@ -17,6 +17,7 @@ class User extends Authenticatable
         'email',
         'password',
         'is_admin',
+        'opleiding_id',
     ];
 
     // Roles relationship and helpers
@@ -79,6 +80,11 @@ class User extends Authenticatable
     public function inschrijvingen()
     {
         return $this->hasMany(Inschrijving::class);
+    }
+
+    public function opleiding()
+    {
+        return $this->belongsTo(Opleiding::class);
     }
 
     public function actieveInschrijvingen()

@@ -41,6 +41,11 @@ class Keuzedeel extends Model
         return $this->hasMany(Inschrijving::class)->where('status', 'ingeschreven');
     }
 
+    public function opleidingen()
+    {
+        return $this->belongsToMany(\App\Models\Opleiding::class, 'keuzedeel_opleiding');
+    }
+
     public function isVol()
     {
         return $this->actieveInschrijvingen()->count() >= $this->max_deelnemers;

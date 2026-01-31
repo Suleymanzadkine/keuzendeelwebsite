@@ -28,6 +28,15 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
+        $user = Auth::user();
+        // Prevent login when user has no assigned opleiding
+        if ($user && empty($user->opleiding_id) && ! $user->isAdmin()) {
+            Auth::guard('web')->logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+            return back()->withErrors(['email' => 'Je hebt geen geldige opleiding toegewezen. Neem contact op met de beheerder.']);
+        }
+
         return redirect()->intended(route('dashboard', absolute: false));
     }
 

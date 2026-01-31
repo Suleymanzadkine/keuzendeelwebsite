@@ -15,8 +15,20 @@ class KeuzedeelController extends Controller
     // Show all available keuzedelen
     public function index()
     {
-        $keuzedelen = Keuzedeel::with('actieveInschrijvingen')->get();
         $user = Auth::user();
+
+        if ($user && $user->isAdmin()) {
+            $keuzedelen = Keuzedeel::with('actieveInschrijvingen')->get();
+        } else {
+            $opleidingId = $user->opleiding_id ?? null;
+            $keuzedelen = Keuzedeel::with('actieveInschrijvingen')
+                ->when($opleidingId, function ($q) use ($opleidingId) {
+                    $q->whereHas('opleidingen', function ($q2) use ($opleidingId) {
+                        $q2->where('opleidingen.id', $opleidingId);
+                    });
+                })
+                ->get();
+        }
 
         return view('keuzedelen.index', compact('keuzedelen', 'user'));
     }
